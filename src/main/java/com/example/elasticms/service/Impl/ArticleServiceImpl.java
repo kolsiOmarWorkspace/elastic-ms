@@ -24,9 +24,11 @@ import org.springframework.data.elasticsearch.core.mapping.IndexCoordinates;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQuery;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
 import org.springframework.data.elasticsearch.core.query.Query;
+import org.springframework.data.elasticsearch.core.query.StringQuery;
 import org.springframework.stereotype.Service;
 import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 
@@ -143,6 +145,60 @@ public class ArticleServiceImpl implements ArticleService {
                 .withAggregations(AggregationBuilders.terms("by_category").field("category").order(BucketOrder.key(true)).size(1000)).withPageable(pageable).build();
         SearchHits<Article> searchHits =  elasticsearchTemplate.search(query, Article.class, IndexCoordinates.of("article"));
 //        Pa
+        SearchPage<Article> searchPage = SearchHitSupport.searchPageFor(searchHits, pageable);
+        return searchPage;
+    }
+
+    @Override
+    public SearchPage<Article> findQueryMatchPhraseByHeadline(int page, int size, String field, String filter) {
+
+//        {
+//            "query": {
+//            "match": {
+//                "Specify the field you want to search": {
+//                    "query": "Enter search terms"
+//                }
+//            }
+//        }
+//        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Query query = new StringQuery("{\n" +
+                "    \"match_phrase\": {\n" +
+                "      \"" +field +"\": {\n" +
+                "        \"query\": \"" + filter + "\"" +
+                "      }\n" +
+                "    }\n" +
+                "  }", pageable);
+
+        SearchHits<Article> searchHits = elasticsearchTemplate.search(query, Article.class, IndexCoordinates.of("article"));
+        SearchPage<Article> searchPage = SearchHitSupport.searchPageFor(searchHits, pageable);
+        return searchPage;
+    }
+
+    @Override
+    public SearchPage<Article> findQueryMultiMatchByHeadline(int page, int size, List<String> field, String filter) {
+
+//        {
+//            "query": {
+//            "multi_match": {
+//                "query": "Enter search terms here",
+//                        "fields": [
+//                "List the field you want to search over",
+//                        "List the field you want to search over",
+//                        "List the field you want to search over"
+//      ]
+//            }
+//        }
+//        }
+
+        Pageable pageable = PageRequest.of(page, size);
+        Query query = new NativeSearchQueryBuilder()
+                .withQuery(QueryBuilders.multiMatchQuery(filter, field.toArray(new String[0])))
+                .withPageable(pageable)
+                .build();
+
+        SearchHits<Article> searchHits = elasticsearchTemplate.search(query, Article.class, IndexCoordinates.of("article"));
         SearchPage<Article> searchPage = SearchHitSupport.searchPageFor(searchHits, pageable);
         return searchPage;
     }
