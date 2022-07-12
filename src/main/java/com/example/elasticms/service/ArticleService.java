@@ -21,5 +21,5 @@ public interface ArticleService {
 
     SearchPage<Article> findQueryMatchPhraseByHeadline(int page, int size, String field, String filter);
 
-    SearchPage<Article> findQueryMultiMatchByHeadline(int page, int size, List<String> field, String filter);
+    SearchPage<Article> findQueryMultiMatchByHeadline(int page, int size, List<String> field, String filter,String boost_field);
 }

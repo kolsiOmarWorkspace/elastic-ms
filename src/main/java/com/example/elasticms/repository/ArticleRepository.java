@@ -1,4 +1,4 @@
-package com.example.elasticms.reo;
+package com.example.elasticms.repository;
 
 import com.example.elasticms.mapping.Article;
 import org.springframework.data.elasticsearch.annotations.Query;

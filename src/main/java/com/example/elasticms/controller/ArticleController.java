@@ -1,9 +1,8 @@
 package com.example.elasticms.controller;
 
 import com.example.elasticms.mapping.Article;
-import com.example.elasticms.reo.ArticleRepository;
+import com.example.elasticms.repository.ArticleRepository;
 import com.example.elasticms.service.ArticleService;
-import com.example.elasticms.service.Impl.ArticleServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.elasticsearch.core.SearchHits;
@@ -54,8 +53,8 @@ public class ArticleController {
     }
 
     @RequestMapping(path = "multi_match_by_filed", method = RequestMethod.GET)
-    public SearchPage<Article>  multi_match_by_filed(Pageable pageable, @RequestParam List<String> field, @RequestParam String filter) {
+    public SearchPage<Article>  multi_match_by_filed(Pageable pageable, @RequestParam List<String> field, @RequestParam String filter, @RequestParam String boost_field) {
         System.out.println(field);
-        return articleService.findQueryMultiMatchByHeadline(pageable.getPageNumber(), pageable.getPageSize(), field, filter);
+        return articleService.findQueryMultiMatchByHeadline(pageable.getPageNumber(), pageable.getPageSize(), field, filter, boost_field);
     }
 }
