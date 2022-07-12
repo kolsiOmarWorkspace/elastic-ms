@@ -2,17 +2,16 @@ package com.example.elasticms.service.Impl;
 
 
 import com.example.elasticms.mapping.Article;
-import com.example.elasticms.reo.ArticleRepository;
+import com.example.elasticms.repository.ArticleRepository;
 import com.example.elasticms.service.ArticleService;
+import org.apache.tomcat.util.digester.Digester;
+import org.elasticsearch.index.query.MultiMatchQueryBuilder;
 import org.elasticsearch.index.query.Operator;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
-import org.elasticsearch.search.aggregations.AggregationBuilder;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.Aggregations;
 import org.elasticsearch.search.aggregations.BucketOrder;
-import org.elasticsearch.search.aggregations.bucket.terms.ParsedStringTerms;
 import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,6 +29,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 
 @Service
@@ -177,14 +177,14 @@ public class ArticleServiceImpl implements ArticleService {
     }
 
     @Override
-    public SearchPage<Article> findQueryMultiMatchByHeadline(int page, int size, List<String> field, String filter) {
+    public SearchPage<Article> findQueryMultiMatchByHeadline(int page, int size, List<String> field, String filter, String boost_field) {
 
 //        {
 //            "query": {
 //            "multi_match": {
 //                "query": "Enter search terms here",
 //                        "fields": [
-//                "List the field you want to search over",
+//                "List the field you want to search over^2",
 //                        "List the field you want to search over",
 //                        "List the field you want to search over"
 //      ]
@@ -192,12 +192,15 @@ public class ArticleServiceImpl implements ArticleService {
 //        }
 //        }
 
+//        the ^2 is to boost on the field
+
         Pageable pageable = PageRequest.of(page, size);
         Query query = new NativeSearchQueryBuilder()
                 .withQuery(QueryBuilders.multiMatchQuery(filter, field.toArray(new String[0])))
                 .withPageable(pageable)
                 .build();
 
+        ((MultiMatchQueryBuilder) ((NativeSearchQuery) query).getQuery()).fields().put(boost_field, 2.0f);
         SearchHits<Article> searchHits = elasticsearchTemplate.search(query, Article.class, IndexCoordinates.of("article"));
         SearchPage<Article> searchPage = SearchHitSupport.searchPageFor(searchHits, pageable);
         return searchPage;
