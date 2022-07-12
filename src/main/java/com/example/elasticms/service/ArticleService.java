@@ -18,4 +18,8 @@ public interface ArticleService {
     Map<String, Long> findAggregationByCategories(Pageable pageable);
 
     SearchPage<Article> findQueryMatchByCategory(int page, int size, String field, String filter, boolean precision);
+
+    SearchPage<Article> findQueryMatchPhraseByHeadline(int page, int size, String field, String filter);
+
+    SearchPage<Article> findQueryMultiMatchByHeadline(int page, int size, List<String> field, String filter);
 }
